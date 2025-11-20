@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Buy — RetailCloud (Demo)</title>
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <header>
+      <nav class="nav">
+        <div class="logo">RetailCloud (Demo)</div>
+        <div class="nav-links">
+          <a href="index.html">Home</a>
+          <a href="buy.html" class="active">Buy</a>
+          <a href="sell.html">Sell</a>
+          <a href="cart.html">Cart <span id="cart-badge" class="badge">0</span></a>
+          <a href="orders.html">Orders</a>
+          <button id="logout-btn" class="btn-link">Logout</button>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <h2 style="margin:0;">Available Products</h2>
+        <a href="index.html" class="btn small">← Back to Home</a>
+      </div>
+      <div id="products-status" class="muted" style="margin-bottom:12px;">Loading products…</div>
+      <section id="products" class="grid"></section>
+    </main>
+
+    <script src="js/auth.js?v=3"></script>
+    <script src="js/products.js?v=3"></script>
+    <script src="js/app.js?v=3"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', async function(){
+        if (!auth_checkAuth()) return window.location.href = 'login.html';
+        renderCartBadge();
+        document.getElementById('logout-btn').addEventListener('click', function(){ auth_logout(); });
+        await renderProducts();
+      });
+    </script>
+  </body>
+</html>

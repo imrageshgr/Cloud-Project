@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Online Retail Store — Home</title>
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <header>
+      <nav class="nav">
+        <div class="logo">RetailCloud (Demo)</div>
+        <div class="nav-links">
+          <a href="index.html">Home</a>
+          <a href="buy.html">Buy</a>
+          <a href="sell.html">Sell</a>
+          <a href="cart.html">Cart <span id="cart-badge" class="badge">0</span></a>
+          <a href="orders.html">Orders</a>
+          <button id="logout-btn" class="btn-link">Logout</button>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container">
+      <section class="hero">
+        <h1>Welcome to RetailCloud</h1>
+        <p>Your demo online store using simulated cloud features.</p>
+        <div class="hero-actions">
+          <a class="btn" href="buy.html">Start Shopping</a>
+          <a class="btn alt" href="sell.html">Sell an Item</a>
+        </div>
+      </section>
+
+      <section id="user-listings" style="display:none; margin-bottom:28px;">
+        <h2>Your Recent Listings</h2>
+        <p class="muted" style="margin-bottom:16px;">Items you've added for sale are available in our marketplace.</p>
+        <div id="recent-items" class="grid"></div>
+        <div style="text-align:center; margin-top:16px;">
+          <a class="btn" href="buy.html">View All Products</a>
+        </div>
+      </section>
+
+      <section class="features">
+        <div class="card">
+          <h3>Fast Demo Cart</h3>
+          <p>Click "Buy" on items to simulate adding to your cart. Cart count updates instantly.</p>
+        </div>
+        <div class="card">
+          <h3>Sell Quickly</h3>
+          <p>Add demo products via a simple form. They're displayed immediately in the Sell page.</p>
+        </div>
+        <div class="card">
+          <h3>Front-end Auth</h3>
+          <p>Register and login using browser `localStorage` (for demo only).</p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <small>Demo only. No real cloud services or payments integrated.</small>
+    </footer>
+
+    <script src="js/auth.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+      // Guard: require login
+      if (!auth_checkAuth()) {
+        window.location.href = 'login.html';
+      }
+      renderCartBadge();
+      document.getElementById('logout-btn').addEventListener('click', function(){ auth_logout(); });
+
+      // Fetch and display user's recent listings on home page (limit to 3)
+      async function showUserListings(){
+        try {
+          const res = await fetch('http://127.0.0.1:5000/api/user-products');
+          const list = await res.json();
+          if (list && list.length > 0) {
+            document.getElementById('user-listings').style.display = 'block';
+            const container = document.getElementById('recent-items');
+            container.innerHTML = '';
+            list.slice(0, 3).forEach((p) => {
+              const card = document.createElement('div');
+              card.className = 'product-card';
+              card.innerHTML = `
+                <img src="${p.image || 'https://via.placeholder.com/400'}" alt="${p.name}" />
+                <div class="p-body">
+                  <h4>${p.name}</h4>
+                  <div class="price">$${parseFloat(p.price).toFixed(2)}</div>
+                </div>
+              `;
+              container.appendChild(card);
+            });
+          }
+        } catch (err) {
+          // Fallback to localStorage
+          const list = JSON.parse(localStorage.getItem('userProducts') || '[]');
+          if (list && list.length > 0) {
+            document.getElementById('user-listings').style.display = 'block';
+            const container = document.getElementById('recent-items');
+            container.innerHTML = '';
+            list.slice(0, 3).forEach((p) => {
+              const card = document.createElement('div');
+              card.className = 'product-card';
+              card.innerHTML = `
+                <img src="${p.image || 'https://via.placeholder.com/400'}" alt="${p.name}" />
+                <div class="p-body">
+                  <h4>${p.name}</h4>
+                  <div class="price">$${parseFloat(p.price).toFixed(2)}</div>
+                </div>
+              `;
+              container.appendChild(card);
+            });
+          }
+        }
+      }
+
+      showUserListings();
+    </script>
+  </body>
+</html>

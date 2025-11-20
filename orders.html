@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>My Orders — RetailCloud (Demo)</title>
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <header>
+      <nav class="nav">
+        <div class="logo">RetailCloud (Demo)</div>
+        <div class="nav-links">
+          <a href="index.html">Home</a>
+          <a href="buy.html">Buy</a>
+          <a href="sell.html">Sell</a>
+          <a href="cart.html">Cart <span id="cart-badge" class="badge">0</span></a>
+          <a href="orders.html" class="active">Orders</a>
+          <button id="logout-btn" class="btn-link">Logout</button>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <h2 style="margin:0;">My Orders</h2>
+        <a href="index.html" class="btn small">← Back to Home</a>
+      </div>
+      <section id="orders-list"></section>
+    </main>
+
+    <script src="js/auth.js?v=2"></script>
+    <script src="js/app.js?v=2"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', async function(){
+        if (!auth_checkAuth()) return window.location.href = 'login.html';
+        renderCartBadge();
+        document.getElementById('logout-btn').addEventListener('click', function(){ auth_logout(); });
+        renderOrders();
+      });
+
+      async function renderOrders(){
+        const container = document.getElementById('orders-list');
+        container.innerHTML = '';
+        try {
+          const res = await fetch('http://127.0.0.1:5000/api/orders');
+          const orders = await res.json();
+          if (!orders || orders.length === 0) {
+            container.innerHTML = '<p class="muted">No orders yet. <a href="buy.html">Start shopping</a></p>';
+            return;
+          }
+          orders.forEach((order) => {
+            const orderDiv = document.createElement('div');
+            orderDiv.style.cssText = 'background:#fff; padding:16px; border-radius:8px; margin-bottom:16px; box-shadow:0 2px 8px rgba(2,6,23,0.06);';
+            let itemsHtml = order.items.map(item => `
+              <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #e5e7eb;">
+                <span><strong>${item.name}</strong></span>
+                <span>₹${parseInt(item.price).toLocaleString('en-IN')}</span>
+              </div>
+            `).join('');
+            const timestamp = new Date(order.timestamp).toLocaleDateString('en-IN');
+            orderDiv.innerHTML = `
+              <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
+                <div><strong>Order #${order.id}</strong><br><small class="muted">${timestamp}</small></div>
+                <div style="text-align:right; font-size:1.1rem; color:#2563eb;"><strong>₹${parseInt(order.total).toLocaleString('en-IN')}</strong></div>
+              </div>
+              ${itemsHtml}
+            `;
+            container.appendChild(orderDiv);
+          });
+        } catch (err) {
+          container.innerHTML = '<p class="muted">Failed to load orders.</p>';
+        }
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Register — RetailCloud (Demo)</title>
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <main class="auth-container">
+      <div class="auth-card">
+        <h2>Create account</h2>
+        <form id="reg-form">
+          <label>Name</label>
+          <input type="text" id="reg-name" required />
+          <label>Email</label>
+          <input type="email" id="reg-email" required />
+          <label>Password</label>
+          <input type="password" id="reg-password" required minlength="4" />
+          <button class="btn" type="submit">Register</button>
+        </form>
+        <p class="muted">Already have an account? <a href="login.html">Login</a></p>
+      </div>
+    </main>
+
+    <script src="js/auth.js"></script>
+    <script>
+      document.getElementById('reg-form').addEventListener('submit', function(e){
+        e.preventDefault();
+        const name = document.getElementById('reg-name').value.trim();
+        const email = document.getElementById('reg-email').value.trim();
+        const password = document.getElementById('reg-password').value;
+        const res = auth_register({name, email, password});
+        if (res.success) {
+          alert('Registered! You are now logged in.');
+          window.location.href = 'index.html';
+        } else {
+          alert('Error: ' + res.message);
+        }
+      });
+    </script>
+  </body>
+</html>

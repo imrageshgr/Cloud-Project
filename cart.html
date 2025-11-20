@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Cart — RetailCloud (Demo)</title>
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <header>
+      <nav class="nav">
+        <div class="logo">RetailCloud (Demo)</div>
+        <div class="nav-links">
+          <a href="index.html">Home</a>
+          <a href="buy.html">Buy</a>
+          <a href="sell.html">Sell</a>
+          <a href="cart.html" class="active">Cart <span id="cart-badge" class="badge">0</span></a>
+          <a href="orders.html">Orders</a>
+          <button id="logout-btn" class="btn-link">Logout</button>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <h2 style="margin:0;">Your Cart</h2>
+        <a href="index.html" class="btn small">← Back to Home</a>
+      </div>
+      <section id="cart-items" class="cart-list"></section>
+      <div id="cart-actions" class="cart-actions"></div>
+    </main>
+
+    <script src="js/auth.js?v=2"></script>
+    <script src="js/app.js?v=2"></script>
+    <script>
+      if (!auth_checkAuth()) window.location.href = 'login.html';
+      renderCartBadge();
+      document.getElementById('logout-btn').addEventListener('click', function(){ auth_logout(); });
+
+      function renderCart(){
+        const items = getCartItems();
+        const container = document.getElementById('cart-items');
+        container.innerHTML = '';
+        if (!items.length) container.innerHTML = '<p>Your cart is empty.</p>';
+        items.forEach((it, idx) => {
+          const row = document.createElement('div');
+          row.className = 'cart-row';
+          row.innerHTML = `
+            <img src="${it.image||'https://via.placeholder.com/80'}" />
+            <div class="c-body">
+              <div class="c-name">${it.name}</div>
+              <div class="c-price">₹${parseInt(it.price).toLocaleString('en-IN')}</div>
+            </div>
+            <button class="btn small" data-idx="${idx}">Remove</button>
+          `;
+          container.appendChild(row);
+        });
+
+        const actions = document.getElementById('cart-actions');
+        const total = items.reduce((s,i)=>s+parseInt(i.price),0);
+        actions.innerHTML = items.length ? `<div class="total">Total: ₹${total.toLocaleString('en-IN')}</div>
+          <button class="btn" id="clear-cart">Clear Cart</button>
+          <button class="btn alt" id="checkout">Checkout & Place Order</button>` : '';
+
+        container.querySelectorAll('button[data-idx]').forEach(btn => {
+          btn.addEventListener('click', function(){ removeFromCart(parseInt(this.dataset.idx)); renderCart(); renderCartBadge(); });
+        });
+
+        document.getElementById('clear-cart')?.addEventListener('click', function(){ clearCart(); renderCart(); renderCartBadge(); });
+        document.getElementById('checkout')?.addEventListener('click', async function(){ 
+          const items = getCartItems();
+          if (!items.length) return alert('Cart is empty');
+          try {
+            const res = await fetch('http://127.0.0.1:5000/api/orders', {
+              method: 'POST',
+              headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({items})
+            });
+            const result = await res.json();
+            if (result.success) {
+              clearCart();
+              renderCartBadge();
+              alert('Order placed successfully!');
+              window.location.href = 'orders.html';
+            }
+          } catch (err) {
+            alert('Error placing order. Try again.');
+          }
+        });
+      }
+
+      renderCart();
+    </script>
+  </body>
+</html>

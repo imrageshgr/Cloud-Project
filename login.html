@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Login — RetailCloud (Demo)</title>
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <main class="auth-container">
+      <div class="auth-card">
+        <h2>Login</h2>
+        <form id="login-form">
+          <label>Email</label>
+          <input type="email" id="login-email" required />
+          <label>Password</label>
+          <input type="password" id="login-password" required minlength="4" />
+          <button class="btn" type="submit">Login</button>
+        </form>
+        <p class="muted">Don't have an account? <a href="register.html">Register</a></p>
+      </div>
+    </main>
+
+    <script src="js/auth.js"></script>
+    <script>
+      document.getElementById('login-form').addEventListener('submit', function(e){
+        e.preventDefault();
+        const email = document.getElementById('login-email').value.trim();
+        const password = document.getElementById('login-password').value;
+        const ok = auth_login(email,password);
+        if (ok) {
+          window.location.href = 'index.html';
+        } else {
+          alert('Invalid credentials. Try registering first.');
+        }
+      });
+    </script>
+  </body>
+</html>
